@@ -202,7 +202,7 @@ apiVersions:
         additionalProperties: false
         required: []
         description: Layout is **deprecated**.
-        properties:
+        properties: {}
       withoutNAT:
         type: object
         additionalProperties: false
