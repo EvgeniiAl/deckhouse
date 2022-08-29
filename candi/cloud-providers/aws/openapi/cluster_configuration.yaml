@@ -203,8 +203,6 @@ apiVersions:
         required: []
         description: Layout is **deprecated**.
         properties:
-          associatePublicIPToMasters:
-            type: boolean
       withoutNAT:
         type: object
         additionalProperties: false
