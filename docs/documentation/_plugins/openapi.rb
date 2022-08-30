@@ -288,7 +288,7 @@ module Jekyll
               end
             end
 
-            if attributes['x-doc-deprecated']
+            if get_hash_value(attributes, 'x-doc-deprecated')
                 name_text = sprintf(%q(<span id="%s" data-anchor-id="%s" class="resources__prop_title anchored"><span data-tippy-content="%s">%s</span><span data-tippy-content="%s" class="resources__prop_is_deprecated">%s</span></span>), linkAnchor, linkAnchor, pathString, name, get_i18n_term('deprecated_parameter_hint'), get_i18n_term('deprecated_parameter') )
             else
                 name_text = sprintf(%q(<span id="%s" data-anchor-id="%s" class="resources__prop_name anchored" data-tippy-content="%s">%s</span>), linkAnchor, linkAnchor, pathString, name)
@@ -508,13 +508,20 @@ module Jekyll
     def format_configuration(input)
         result = []
         result.push('<div markdown="0">')
-        if !( input.has_key?('i18n'))
+
+        if input.nil?
+           input = {}
+        end
+
+        if !( get_hash_value(input, 'i18n') )
            input['i18n'] = {}
         end
-        if !( input['i18n'].has_key?('en'))
+
+        if !( get_hash_value(input, 'i18n', 'en' ) )
            input['i18n']['en'] = { "properties" => input['properties'] }
         end
-        if ( input.has_key?("properties"))
+
+        if ( get_hash_value(input, "properties") )
            then
             converter = Jekyll::Converters::Markdown::KramdownParser.new(Jekyll.configuration())
 
@@ -523,17 +530,19 @@ module Jekyll
                 _primaryLanguage = nil
                 _fallbackLanguage = nil
 
-                if ( input['i18n'].has_key?(@context.registers[:page]["lang"]) and input['i18n'][@context.registers[:page]["lang"]].has_key?("properties") )
-                    _primaryLanguage = input['i18n'][@context.registers[:page]["lang"]]["properties"][key]
-                end
+                # if ( input['i18n'].has_key?(@context.registers[:page]["lang"]) and input['i18n'][@context.registers[:page]["lang"]].has_key?("properties") )
+                #     _primaryLanguage = input['i18n'][@context.registers[:page]["lang"]]["properties"][key]
+                # end
+                _primaryLanguage = get_hash_value(input,  'i18n', @context.registers[:page]["lang"], 'properties', key)
                 if ( @context.registers[:page]["lang"] == 'en' )
                     fallbackLanguageName = 'ru'
                 else
                     fallbackLanguageName = 'en'
                 end
-                if ( input['i18n'].has_key?(fallbackLanguageName) and input['i18n'][fallbackLanguageName].has_key?("properties") )
-                    _fallbackLanguage = input['i18n'][fallbackLanguageName]["properties"][key]
-                end
+                # if ( input['i18n'].has_key?(fallbackLanguageName) and input['i18n'][fallbackLanguageName].has_key?("properties") )
+                #     _fallbackLanguage = input['i18n'][fallbackLanguageName]["properties"][key]
+                # end
+                _fallbackLanguage = get_hash_value(input,  'i18n', fallbackLanguageName, 'properties', key)
 
                 result.push(format_schema(key, value, input, _primaryLanguage, _fallbackLanguage, ["parameters"] ))
             end

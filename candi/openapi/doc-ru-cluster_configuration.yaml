@@ -1,0 +1,42 @@
+kind: ClusterConfiguration
+apiVersions:
+- apiVersion: deckhouse.io/v1
+  openAPISpec:
+    description: General parameters of the cluster.
+    properties:
+      apiVersion:
+        description: ТУДУ
+      kind:
+        description: ТУДУ
+      clusterType:
+        description: ТУДУ
+      cloud:
+        description: ТУДУ
+        properties:
+          provider:
+            description: ТУДУ
+          prefix:
+            description: |
+              ТУДУ
+      podSubnetCIDR:
+        description: Address space of the cluster's Pods.
+      podSubnetNodeCIDRPrefix:
+        description: Префикс сети подов на узле.
+      serviceSubnetCIDR:
+        description: |
+          Address space of the cluster's services.
+      clusterDomain:
+        description: Cluster domain (used for local routing).
+      defaultCRI:
+        description: CRI used in the cluster.
+      kubernetesVersion:
+        description: Kubernetes control plane version to use in a cluster.
+      packagesProxy:
+        description: Туду
+        properties:
+          uri:
+            description: Туду
+          username:
+            description: Туду
+          password:
+            description: Туду

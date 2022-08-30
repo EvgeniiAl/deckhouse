@@ -3,6 +3,7 @@ apiVersions:
 - apiVersion: deckhouse.io/v1
   openAPISpec:
     type: object
+    description: General parameters of a cluster.
     additionalProperties: false
     required: [apiVersion, kind, clusterType, kubernetesVersion, podSubnetCIDR, serviceSubnetCIDR, clusterDomain]
     x-examples:
@@ -33,6 +34,8 @@ apiVersions:
         enum: [Cloud, Static]
       cloud:
         type: object
+        description: |
+          Type of a cloud provider (if `Cloud` clusterType is used).
         required: [provider]
         additionalProperties: false
         properties:
@@ -47,19 +50,27 @@ apiVersions:
             - "Azure"
           prefix:
             type: string
+            description: |
+              Prefix to differentiate cluster objects (can be used, e.g., in routing).
             pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
       podSubnetCIDR:
         type: string
+        description: Address space of the cluster's Pods.
       podSubnetNodeCIDRPrefix:
         type: string
+        description: The prefix of Pod network on a node.
         default: "24"
       serviceSubnetCIDR:
         type: string
+        description: |
+          Address space of the cluster's services.
       clusterDomain:
         type: string
+        description: Cluster domain (used for local routing).
         default: "cluster.local"
       defaultCRI:
         type: string
+        description: CRI used in the cluster.
         enum:
         - "Docker"
         - "Containerd"
@@ -67,6 +78,7 @@ apiVersions:
         default: "Containerd"
       kubernetesVersion:
         type: string
+        description: Kubernetes control plane version to use in a cluster.
         enum:
         - "1.19"
         - "1.20"
@@ -77,14 +89,19 @@ apiVersions:
         - "Automatic"
       packagesProxy:
         type: object
+        description: |
+          A proxy server for downloading packages (e.g deb or rpm).
         additionalProperties: false
         properties:
           uri:
             type: string
+            description: The address of the proxy server.
           username:
             type: string
+            description: The username for authenticating with the proxy server.
           password:
             type: string
+            description: The password for authenticating with the proxy server.
         oneOf:
           - properties:
               uri:
