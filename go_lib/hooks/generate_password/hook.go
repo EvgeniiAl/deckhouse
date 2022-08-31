@@ -146,10 +146,17 @@ func (h *Hook) Handle(input *go_hook.HookInput) error {
 		return nil
 	}
 
-	// Try to set password from the Secret.
+	// Try to restore password from the Secret.
 	snap := input.Snapshots[secretBindingName]
 	if len(snap) > 0 {
-		storedPassword := snap[0].(string)
+		secretField, ok := snap[0].(string)
+		if !ok {
+			return fmt.Errorf("problem getting field '%s' from Secret/%s: got %T, while string is expected", h.SecretField(), h.Secret.Name, snap[0])
+		}
+		storedPassword, err := h.extractPasswordFromBasicAuth(secretField)
+		if err != nil {
+			return err
+		}
 		input.Values.Set(passwordInternalKey, storedPassword)
 		return nil
 	}
