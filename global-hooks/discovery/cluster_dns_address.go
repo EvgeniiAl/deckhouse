@@ -65,6 +65,24 @@ func applyDNSServiceIPFilter(obj *unstructured.Unstructured) (go_hook.FilterResu
 	return ServiceAddr{service.Name, service.Spec.ClusterIP}, nil
 }
 
+// Providers are deploying node-local-dns to cluster in different ways
+// Here is example for Deckhouse and GKE when node-local-dns is deployed
+
+// 		Services in 'kube-system' namespace:
+
+//      | .metadata.Name     |  .spec.Type   | .metadata.labels
+//  ----+--------------------+---------------+-------------------
+//  D8  | kube-dns           |  ClusterIP    |  k8s-app=kube-dns
+//      | kube-dns-upstream  |  ClusterIP    |  k8s-app=kube-dns
+//  ----+--------------------+---------------+-------------------
+//  GKE | kube-dns           |  ExternalName |  k8s-app=kube-dns
+//      | d8-kube-dns        |  ClusterIP    |  k8s-app=kube-dns
+
+// dnsAdress will be taken only from ClusterIP service in order:
+// - from 'kube-dns' service if it's type ClusterIP
+// - from other service selected by label 'k8s-app=kube-dns'
+//   if there are no more services with same label in namespace
+
 func discoveryDNSAddress(input *go_hook.HookInput) error {
 	dnsAddress := ""
 
