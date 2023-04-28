@@ -50,6 +50,11 @@ var _ = sdk.RegisterFunc(&go_hook.HookConfig{
 	},
 }, discoveryDNSAddress)
 
+type ServiceAddr struct {
+	Name      string
+	ClusterIP string
+}
+
 func applyDNSServiceIPFilter(obj *unstructured.Unstructured) (go_hook.FilterResult, error) {
 	var service v1core.Service
 	err := sdk.FromUnstructured(obj, &service)
@@ -57,24 +62,29 @@ func applyDNSServiceIPFilter(obj *unstructured.Unstructured) (go_hook.FilterResu
 		return "", err
 	}
 
-	return service.Spec.ClusterIP, nil
+	return ServiceAddr{service.Name, service.Spec.ClusterIP}, nil
 }
 
 func discoveryDNSAddress(input *go_hook.HookInput) error {
-	dnsAddressSnap := input.Snapshots["dns_cluster_ip"]
-
 	dnsAddress := ""
-	for _, addrRaw := range dnsAddressSnap {
-		addr := addrRaw.(string)
-		if addr == "None" || addr == "" {
+
+	for _, sRaw := range input.Snapshots["dns_cluster_ip"] {
+		s := sRaw.(ServiceAddr)
+
+		if s.Name == "kube-dns" && s.ClusterIP != "None" && s.ClusterIP != "" {
+			input.Values.Set("global.discovery.dnsAddress", s.ClusterIP)
+			return nil
+		}
+
+		if s.ClusterIP == "None" || s.ClusterIP == "" {
 			continue
 		}
 
-		if dnsAddress != "" && dnsAddress != addr {
-			return fmt.Errorf("ERROR: can't find a single kube-dns service, found %s %s", dnsAddress, addr)
+		if dnsAddress != "" && dnsAddress != s.ClusterIP {
+			return fmt.Errorf("ERROR: can't select a single service by 'k8s-app: kube-dns' label, found %s %s", dnsAddress, s.ClusterIP)
 		}
 
-		dnsAddress = addr
+		dnsAddress = s.ClusterIP
 	}
 
 	if dnsAddress == "" {
